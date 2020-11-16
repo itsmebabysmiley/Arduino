@@ -1,0 +1,6 @@
+ถ้าไป Big Sur แล้วจะมีปัญหานี้ครับ ผมก็เป็นเหมือนกัน
+ลองทำตามนี้ดูครับ
+โหลดไฟล์ esptoo.py ตัวนี้มา https://mega.nz/file/v5tVHajb...
+แล้วเอาไปแทนที่ตัวเดิมใน Library/Arduino15/packages/esp8266/hardware/esp8266/2.7.4/tools/esptool
+!!!! อย่าลืม Backup อันเก่าไว้ก่อนนะครับ !!!!
+Credit : https://github.com/pyserial/pyserial/issues/509
