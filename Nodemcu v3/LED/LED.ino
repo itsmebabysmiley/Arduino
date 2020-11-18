@@ -1,6 +1,6 @@
-int LEDD4 = D4;
+int LEDD4 = D1;
 void setup() {
-  pinMode(LEDD4, OUTPUT); //set D0 to be output
+  pinMode(LEDD4, OUTPUT); //set D1 to be output
   
 }
 
