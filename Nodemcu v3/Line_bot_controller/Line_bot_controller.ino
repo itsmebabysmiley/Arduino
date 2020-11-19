@@ -1,3 +1,4 @@
+// https://medium.com/isync/line-bot-%E0%B8%84%E0%B8%A7%E0%B8%9A%E0%B8%84%E0%B8%B8%E0%B8%A1-esp32-arduino-655a4ea4fdd6
 #include <ESP8266WiFi.h>
 #include <iSYNC.h>
 
