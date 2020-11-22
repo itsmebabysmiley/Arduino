@@ -5,12 +5,12 @@
 WiFiClient client;
 iSYNC iSYNC(client);
 
-String ssid = "SURIYA-2.4G";
-String pass = "0868894659";
+String ssid = "--sensor--";
+String pass = "--sensor--";
 
-String iSYNC_USERNAME = "snzzare";
-String iSYNC_KEY = "5fb695bb5e614c07a2d91a77";
-String iSYNC_AUTH = "5fb695995e614c07a2d91a74"; //auth project
+String iSYNC_USERNAME = "--sensor--";
+String iSYNC_KEY = "--sensor--";
+String iSYNC_AUTH = "--sensor--"; //auth project
 
 void callback(char* topic, byte* payload, unsigned int length) {
   String msg = "";
@@ -23,12 +23,12 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if(msg.startsWith("LINE:"))msg = msg.substring(5);
 
   /* command control */
-  if(msg.equals("เปิดไฟ")){
+  if(msg.equals("เปิดไฟ") || msg.equals("on") || msg.equals("On")){
       digitalWrite(D2,1);
-      iSYNC.mqPub(iSYNC_KEY,"ได้เลยจ๊ะพี่จ๋า");   //Publish
-  }else if(msg.equals("ปิดไฟ")){
+      iSYNC.mqPub(iSYNC_KEY,"เปืดไฟ จ๊ะพี่จ๋า");   //Publish
+  }else if(msg.equals("ปิดไฟ") || msg.equals("off") || msg.equals("Off")){
       digitalWrite(D2,0);
-      iSYNC.mqPub(iSYNC_KEY,"ได้เลยจ๊ะพี่จ๋า");   //Publish
+      iSYNC.mqPub(iSYNC_KEY,"ปิดไฟ จ๊ะพี่จ๋า");   //Publish
   }
 }
 
