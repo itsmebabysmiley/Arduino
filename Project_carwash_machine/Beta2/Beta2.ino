@@ -14,6 +14,10 @@
  *    lcd.backlight();  turn backlight on.
  *    lcd.setCursor(0, 0); set cursor at 0,0 mean first line first index. (0,1 means second line and first index.)
  *    lcd.print(text);  show text on lcd.
+ *    
+ * Contact: 
+ *    Twitter- @itmebabysmiley
+ *    gitHub- https://github.com/itsmebabysmiley?tab=repositories
  */
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>

@@ -5,6 +5,10 @@
  * this file didn't include EEPROM.h 
  * this is just sample of setup menu. it kinda mess a little bit.
  * I try to write important comment on it. so if I forgot then It's my problem.
+ * 
+ * Contact: 
+ *    Twitter- @itmebabysmiley
+ *    gitHub- https://github.com/itsmebabysmiley?tab=repositories
  */
 
 int button = D5; //GPIO
