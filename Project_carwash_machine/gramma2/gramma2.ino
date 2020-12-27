@@ -15,9 +15,13 @@
  #include <Wire.h>
  #include <LiquidCrystal_I2C.h>
  #include <EEPROM.h>
-
+ #include "Output335.h"
+ #define RELAY D4
+ 
+ Output335 relay1(RELAY);
+int buzzer = 3;
 int coin_signal = D5;
-int led = D4;
+//int led = D4; //relay
 int button = D6;
 int button2 = D7;
 boolean check = false;
@@ -31,10 +35,11 @@ int _min = 0;
 int _hr = 0;
 unsigned long _time;
 unsigned long prev_time = 0;
-int limit_sec; //
-int limit_min;
+int limit_sec = 0; //
+int limit_min = 0;
 int limit_hr = 0;
 int max_sec = 0;
+int limit_time = 0;
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 void setup()
 {
@@ -44,7 +49,8 @@ void setup()
     pinMode(coin_signal, INPUT);
     pinMode(button, INPUT);
     pinMode(button2, INPUT);
-    pinMode(led, OUTPUT);
+    //pinMode(led, OUTPUT);
+    //pinMode(buzzer, OUTPUT);
     attachInterrupt(digitalPinToInterrupt(coin_signal), getCoin, FALLING);
 
     lcd.begin();
@@ -63,6 +69,8 @@ void setup()
     EEPROM.get(eeeAddress,limit_min);
     eeeAddress += sizeof(int);
     EEPROM.get(eeeAddress,limit_sec);
+    limit_time = (limit_min*60) + limit_sec;
+    Serial.println(limit_time);
 }
 /**
  *        >>>SUPPOSE LED IS THE RELAY<<<
@@ -74,7 +82,10 @@ void setup()
  */
 void loop()
 {
-    digitalWrite(led, 0);
+    //digitalWrite(led, 0);
+    relay1.Off();
+    //Serial.println(relay1.Status());
+    
     button_state = digitalRead(button);
     if (button_state == HIGH)
     {
@@ -85,7 +96,7 @@ void loop()
             prev_time = _time;
         Serial.println(_time); //prints time when pushing
         delay(1000);           
-        if (_time - prev_time > 4000) //if push more than 5 seconds
+        if (_time - prev_time > 3000) //if push more than 5 seconds
         {   
             //String s = "time: " + String(_time) + "prev_time: " + String(prev_time);
             //Serial.println(s);
@@ -100,7 +111,9 @@ void loop()
     }
     if (coin >= 5)
     {
-        digitalWrite(led, 1);
+        //digitalWrite(led, 1);
+        relay1.On();
+        //Serial.println(relay1.Status());
         String s = "time:" +String(_min)+":"+String(_sec);
         Serial.println(s);
         lcd.setCursor(0,1);
@@ -108,7 +121,9 @@ void loop()
 
         if (limit_min == _min && limit_sec == _sec)
         {
-            digitalWrite(led, 0);
+            //digitalWrite(led, 0);
+            relay1.Off();
+            //Serial.println(relay1.Status());
             _reset_();
         }
         _sec++;
@@ -135,7 +150,9 @@ ICACHE_RAM_ATTR void getCoin()
     lcd.setCursor(0, 0);
     lcd.print(coin);
     lcd.print(" Bath");
-    max_sec += (limit_min*60) + limit_sec;
+    
+    //max_sec = (limit_min*60) + limit_sec;
+    max_sec += limit_time;
     limit_min = int(max_sec / 60);
     limit_sec = max_sec % 60;
     String s = "Limit time:" + String(limit_min)+":"+String(limit_sec);
