@@ -1,11 +1,12 @@
 /*
  * Author: Baby
- * Last modify: December 27,2020
+ * Last modify: Jan 01,2021
  * 
  * -this is almost complete. just add EEPROM thing then it is complete
  * -this file I already add another button for increase time limit in setup function.
  * -I already add rom things.
  * -basically it finished. but it's not complete yet. 
+ * -waiting for pcb to modify code again.(we have to change an relay parts.
  * 
  * Contact: 
  *    Twitter- @itmebabysmiley
@@ -15,16 +16,15 @@
  #include <Wire.h>
  #include <LiquidCrystal_I2C.h>
  #include <EEPROM.h>
- #include "Output335.h"
- #define RELAY D4
- 
- Output335 relay1(RELAY);
-int buzzer = 3;
-int coin_signal = D5;
-//int led = D4; //relay
-int button = D6;
-int button2 = D7;
+
+const int relay = D8;
+const int coin_signal = D5;
+const int LED = D3;
+const int sw1 = D6;
+const int sw2 = D7;
+
 boolean check = false;
+
 int coin_state = 0;
 int button_state = 0;
 int coin = 0;
@@ -46,13 +46,19 @@ void setup()
     // put your setup code here, to run once:
     Serial.begin(115200);
     EEPROM.begin(512);
-    pinMode(coin_signal, INPUT);
-    pinMode(button, INPUT);
-    pinMode(button2, INPUT);
-    //pinMode(led, OUTPUT);
-    //pinMode(buzzer, OUTPUT);
+    pinMode(sw1, INPUT);
+    pinMode(sw2, INPUT);
+    pinMode(relay, OUTPUT);
+    pinMode(LED, OUTPUT);
     attachInterrupt(digitalPinToInterrupt(coin_signal), getCoin, FALLING);
-
+    
+    /* LED CHECK STATUS */
+    digitalWrite(LED, HIGH); delay(500);
+    digitalWrite(LED, LOW);
+    digitalWrite(LED, HIGH); delay(500);
+    digitalWrite(LED, LOW);
+    /* END CHECK STATUS */
+    
     lcd.begin();
     lcd.backlight();
     lcd.setCursor(0, 0);
@@ -60,12 +66,13 @@ void setup()
     int eeAddress = 0;
     int eeeAddress = 0;
     //put only first time.
-//    EEPROM.put(eeAddress,0);
-//    eeAddress += sizeof(int); 
-//    EEPROM.put(eeAddress,30);
-//    EEPROM.commit();
-    //read time from rom
-    /* change to eeprom */
+    /*
+      EEPROM.put(eeAddress,0);
+      eeAddress += sizeof(int); 
+      EEPROM.put(eeAddress,30);
+      EEPROM.commit();
+    */
+    //get time from rom
     EEPROM.get(eeeAddress,limit_min);
     eeeAddress += sizeof(int);
     EEPROM.get(eeeAddress,limit_sec);
@@ -83,10 +90,9 @@ void setup()
 void loop()
 {
     //digitalWrite(led, 0);
-    relay1.Off();
-    //Serial.println(relay1.Status());
+    digitalWrite(relay, LOW);
     
-    button_state = digitalRead(button);
+    button_state = digitalRead(sw1);
     if (button_state == HIGH)
     {
         Serial.print("Time: ");
@@ -112,7 +118,7 @@ void loop()
     if (coin >= 5)
     {
         //digitalWrite(led, 1);
-        relay1.On();
+        digitalWrite(relay, HIGH);
         //Serial.println(relay1.Status());
         String s = "time:" +String(_min)+":"+String(_sec);
         Serial.println(s);
@@ -122,8 +128,7 @@ void loop()
         if (limit_min == _min && limit_sec == _sec)
         {
             //digitalWrite(led, 0);
-            relay1.Off();
-            //Serial.println(relay1.Status());
+            digitalWrite(relay, LOW);
             _reset_();
         }
         _sec++;
@@ -207,7 +212,7 @@ void doSetTime()
             int count_2stop = 0;
             char save[] = {'s','a','v','e'};
             /*push button for 5 second to save and exit the setup menu. */
-            while (digitalRead(button) == HIGH)
+            while (digitalRead(sw1) == HIGH)
             {
                 Serial.println(save[count_2stop++]);
                 delay(1000);
@@ -233,12 +238,14 @@ void doSetTime()
                     lcd.print("SAVED!!");
                     delay(1000);
                     lcd.clear();
-                    lcd.print("0 Bath");
-                    return;
+                    lcd.print("Reset...");
+                    Serial.println("Reset..");
+                    ESP.restart();
+//                    return;
                 }
             }
             /* end exit menu. */
-        if(digitalRead(button2) == HIGH){
+        if(digitalRead(sw2) == HIGH){
             check = true;
         }
         /* maximum time limit is 10 minute */
