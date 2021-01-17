@@ -39,49 +39,61 @@ void loop() {
       k = false;
     }
     if(digitalRead(sw1)){
-      digitalWrite(relay1, HIGH);
       while(digitalRead(sw1)){
         delay(50);
       }
-      digitalWrite(relay1, LOW);
-      water();
-      Serial.println("hi");
+      //water();
+      doCountTime("water", sw1, relay1, 3);
       k = true;
       if(coin <= 0 ){
         c = true; 
       }
     }//switch 1
-    
-  }//while coin
-
-}
-
-void water(){
-  delay(1000);
-  int cTime = 0;
-  int pTime = millis();
-  while(coin > 0 ){
-    digitalWrite(relay1, HIGH);
-    cTime = millis();
-    if(digitalRead(sw1)){
-      while(digitalRead(sw1)){
+    if(digitalRead(sw2)){
+      while(digitalRead(sw2)){
         delay(50);
       }
-      digitalWrite(relay1, LOW);
+      //foam();
+      doCountTime("foam", sw2, relay2, 1);
+      k = true;
+      if(coin <= 0 ){
+        c = true; 
+      }
+    }//switch2
+  }//while coin
+}//loop
+
+void doCountTime(String type,int sw ,int relay, int _time){
+  delay(1000);
+  Serial.println(type);
+  int cTime = 0;
+  int pTime = millis();
+  int sec = 0;
+  while(coin > 0 ){
+    digitalWrite(relay, HIGH);
+    cTime = millis();
+    if(digitalRead(sw)){
+      while(digitalRead(sw)){
+        delay(50);
+      }
+      digitalWrite(relay, LOW);
       Serial.println("Paused");
       return;
     }
     if(cTime-pTime >= 1000){
-      pTime = cTime;
       Serial.printf("previous: %d current: %d \n",pTime,cTime);
-      coin --;
-      Serial.println(coin);
+      pTime = cTime;
+      sec++;
       delay(50);
     }
+    if(sec == _time){
+      sec = 0;
+      coin --;
+      Serial.println(coin);
+    }
   }//while coin
-  digitalWrite(relay1, LOW);
-}
-
+  digitalWrite(relay, LOW);
+}//docounttime
 
 ICACHE_RAM_ATTR void getCoin(){
   coin = 10;
