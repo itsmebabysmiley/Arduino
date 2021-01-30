@@ -28,12 +28,14 @@ int sw2 = D6;
 int sw3 = D7;
 int relay1 = D3;
 int relay2 = D8;
+int relay3 = D4;
 int coin_signal = D5;
 unsigned long prevTime = 0;
 unsigned long curTime = 0;
 uint8_t data[] = { 0xff, 0xff, 0xff, 0xff };
 uint8_t blank[] = { 0x00, 0x00, 0x00, 0x00 };
 int coin = 0;
+int coin_state = HIGH;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
@@ -44,16 +46,17 @@ void setup() {
   pinMode(coin_signal, INPUT);
   pinMode(relay1, OUTPUT);
   pinMode(relay2, OUTPUT);
+  pinMode(relay3, OUTPUT);
   digitalWrite(sw1, LOW);
   digitalWrite(sw2, LOW);
   digitalWrite(sw3, LOW);
   digitalWrite(relay1, LOW);
   digitalWrite(relay2, LOW);
+  digitalWrite(relay3, HIGH);
   prevTime = millis();
   display.setBrightness(0x00);
 }
 boolean a = false;
-boolean c = true;
 boolean k = true;
 boolean d = false;
 boolean sw1_state = true;
@@ -80,14 +83,17 @@ void loop() {
     }
   }
   L1:
-  int coin_s = digitalRead(coin_signal);
-  if(coin_s){
-    coin += 5;
-    delay(40);
-    coin_s = 0;
-    d = true;
-    display.showNumberDec(coin);
+  if(coin_state == HIGH){
+    int coin_s = digitalRead(coin_signal);
+    if(coin_s){
+      coin += 5;
+      delay(100);
+      coin_s = 0;
+      d = true;
+      display.showNumberDec(coin);
+    }
   }
+  
   if(d){
     Serial.printf("coin: %d\n", coin);
     Serial.println("Choose water(1) or foam(2)"); 
@@ -95,37 +101,34 @@ void loop() {
   }
   if((digitalRead(sw1) || digitalRead(sw2)) && coin > 0){
     d = true;
+    coin_state = LOW;
+    digitalWrite(relay3, LOW);
     if(digitalRead(sw1)){
       while(digitalRead(sw1)){
         delay(50);
       }
       sw1_state = true;
-      //water();
       doCountTime("water", sw1, relay1, 3);
       k = true;
-      if(coin <= 0 ){
-        c = true; 
-      }
-      if(sw1_state && sw2_state){
-        goto L1;
-      }
     }//switch 1
     if(digitalRead(sw2)){
       while(digitalRead(sw2)){
         delay(50);
       }
       sw2_state = true;
-      //foam();
       doCountTime("foam", sw2, relay2, 1);
       k = true;
-      if(coin <= 0 ){
-        c = true; 
-      }
-      if(sw1_state && sw2_state){
-        display.clear();
-        goto L1;
-      }
     }//switch2
+    if(coin <= 0 ){
+      coin_state = HIGH; 
+      digitalWrite(relay3, HIGH);
+    }
+    if(sw1_state && sw2_state){
+      coin_state = HIGH;
+      digitalWrite(relay3, HIGH);
+      display.clear();
+      goto L1;
+    }
   }//main if.
   if(digitalRead(sw3)){
       setting();
